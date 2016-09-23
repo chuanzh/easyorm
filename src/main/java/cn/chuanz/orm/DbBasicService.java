@@ -1,7 +1,10 @@
 package cn.chuanz.orm;
 
+import java.io.Reader;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,7 +16,10 @@ import org.apache.log4j.Logger;
 
 import cn.chuanz.util.FuncStatic;
 
-
+/**
+ * 注意调用freeResource释放资源
+ *
+ */
 public class DbBasicService implements NeedConnect {
 	private static Logger logger = Logger.getLogger(DbBasicService.class);
 	private DbConnectTool dbConnect = null;
@@ -21,8 +27,16 @@ public class DbBasicService implements NeedConnect {
 	private HashMap<String, Object> newData = null;
 	private Connection tmpConn = null;
 	private List<Statement> tmpStatement = null;
+	private boolean ifTransaction = false;
+	private boolean writeFlag = false;
 	private String threadId = null;
 	protected DbBasicService() {
+	}
+	/**
+	 * 启动事务
+	 */
+	public void UseTransction(){
+		this.ifTransaction = true;
 	}
 
 	public void setThreadId(String var){
@@ -33,7 +47,17 @@ public class DbBasicService implements NeedConnect {
 	}
 	private Connection getConnection(){
 		try {
-			tmpConn = this.dbConnect.getConnection();
+			//如果是事务，则只用一个connection,如果不是，则每次用新的connection
+			if(this.ifTransaction){
+				if(tmpConn == null){
+					tmpConn = this.dbConnect.getConnection(true);
+					tmpConn.setAutoCommit(false);
+				}
+				return tmpConn;
+			}else{
+				tmpConn = this.dbConnect.getConnection(writeFlag);
+				return tmpConn;
+			}
 		} catch (Exception e) {
 			logger.error(FuncStatic.errorTrace(e));
 		}
@@ -49,6 +73,27 @@ public class DbBasicService implements NeedConnect {
 		this.table = table;
 	}
 
+	public void commit() throws Exception {
+		if(this.ifTransaction){
+			try {
+				if (getConnection() != null) {
+					getConnection().commit();
+				}
+			} catch (Exception e) {
+				try {
+					getConnection().rollback();
+				} catch (SQLException e1) {
+					logger.error(FuncStatic.errorTrace(e1));
+				}
+				throw e;
+			}
+		}
+	}
+
+	public void commitAndFreeResource() throws Exception {
+		this.commit();
+		this.freeResource();
+	}
 	/** @param value */
 	public void setNewData(HashMap<String, Object> value) {
 		newData = value;
@@ -77,8 +122,11 @@ public class DbBasicService implements NeedConnect {
 
 
 	public List<HashMap<String, Object>> queryExec(ConditionTool condtionTool) throws Exception {
+		
+		this.writeFlag = false;
 		String[] cs = table.getSelectColumns().split(",");
 		String sql = this.queryCreateSql(condtionTool);
+		loggerSql(sql);
 		
 		List<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
 		Statement resultStatement = null;
@@ -90,6 +138,7 @@ public class DbBasicService implements NeedConnect {
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				for (String column : cs) {
 					if(table.isDateColumn(column)){
+//						java.sql.Date sqlDate = resultSet.getDate(column);
 						java.sql.Timestamp sqlDate = resultSet.getTimestamp(column);
 						if(sqlDate != null){
 							map.put(column, new Date(sqlDate.getTime()));
@@ -106,11 +155,15 @@ public class DbBasicService implements NeedConnect {
 		} finally {
 			freeResult(resultSet);
 			closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
 		return list;
 	}
 
 	public long queryExecCount(ConditionTool condtionTool) throws Exception {
+		this.writeFlag = false;
 		StringBuilder sql = new StringBuilder();
 		sql.append("select count(*) as c from ");
 		sql.append(table.getTableName());
@@ -119,6 +172,7 @@ public class DbBasicService implements NeedConnect {
 			sql.append(this.getConditionStr(condtionTool));
 		}
 		String querySql = sql.toString();
+		loggerSql(querySql);
 
 		ResultSet resultSet = null;
 		Statement resultStatement = null;
@@ -132,11 +186,16 @@ public class DbBasicService implements NeedConnect {
 		} finally {
 			freeResult(resultSet);
 			closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
 	}
 
 	/** @param 调用完后需手动释放资源  */
 	public ResultSet queryExecResultSet(String sql) throws Exception {
+		this.writeFlag = false;
+		loggerSql(sql);
 		Statement resultStatement = null;
 		try {
 			resultStatement = this.getConnection().createStatement();
@@ -169,6 +228,9 @@ public class DbBasicService implements NeedConnect {
 		}
 	}
 	public List<HashMap<String, String>> queryExecSql(String sql) throws Exception {
+		this.writeFlag = false;
+		loggerSql(sql);
+		
 		List<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 		Statement resultStatement = null;
 		ResultSet resultSet = null;
@@ -188,6 +250,9 @@ public class DbBasicService implements NeedConnect {
 		} finally {
 			freeResult(resultSet);
 			closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
 		return list;
 	}
@@ -229,6 +294,48 @@ public class DbBasicService implements NeedConnect {
 		tmpConn = null;
 	}
 
+	/** @param columnName */
+	public StringBuilder readTextColumn(String columnName,ConditionTool condtionTool) throws Exception {
+		this.writeFlag = false;
+		StringBuilder sql = new StringBuilder();
+		sql.append("select " + columnName + " from ");
+		sql.append(table.getTableName());
+		if (condtionTool != null && condtionTool.hasCondition()) {
+			sql.append(" where ");
+			sql.append(this.getConditionStr(condtionTool));
+		}
+		String querySql = sql.toString();
+		loggerSql(querySql);
+
+		StringBuilder sb = new StringBuilder();
+		ResultSet resultSet = null;
+		Statement resultStatement = null;
+		try {
+			resultStatement = this.getConnection().createStatement();
+			resultSet = resultStatement.executeQuery(sql.toString());
+			if (resultSet.next()) {
+				Clob c = resultSet.getClob(columnName);
+				if (c != null) {
+					Reader reader = c.getCharacterStream();
+					char[] charbuf = new char[4096];
+					for (int i = reader.read(charbuf); i > 0; i = reader
+							.read(charbuf)) {
+						sb.append(charbuf, 0, i);
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			freeResult(resultSet);
+			this.closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
+		}
+		return sb;
+	}
+
 	public String updateCreateSql(ConditionTool condtionTool) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ");
@@ -250,7 +357,9 @@ public class DbBasicService implements NeedConnect {
 	}
 
 	public int updateExec(ConditionTool condtionTool) throws Exception {
+		this.writeFlag = true;
 		String sql = updateCreateSql(condtionTool);
+		loggerSql(sql);
 
 		Statement resultStatement = null;
 		try {
@@ -261,6 +370,9 @@ public class DbBasicService implements NeedConnect {
 			logger.error(FuncStatic.errorTrace(e));
 		}finally{
 			this.closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
 		return 0;
 		
@@ -287,7 +399,10 @@ public class DbBasicService implements NeedConnect {
 	}
 
 	public void insertExec() throws Exception {
+		this.writeFlag = true;
 		String sql = insertCreateSql();
+		loggerSql(sql);
+
 		Statement resultStatement = null;
 		try {
 			resultStatement = this.getConnection().createStatement();
@@ -296,11 +411,16 @@ public class DbBasicService implements NeedConnect {
 			logger.error(FuncStatic.errorTrace(e));
 		}finally{
 			this.closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
  	}
 
 	public String insertExecReauto() throws Exception {
+		this.writeFlag = true;
 		String sql = insertCreateSql();
+		loggerSql(sql);
 		String reid = null;
 		Statement resultStatement = null;
 		try {
@@ -322,6 +442,9 @@ public class DbBasicService implements NeedConnect {
 			logger.error(FuncStatic.errorTrace(e));
 		}finally {
 			this.closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
 		return reid;
 	}
@@ -338,12 +461,19 @@ public class DbBasicService implements NeedConnect {
 	}
 
 	public int deleteExec(ConditionTool condtionTool) throws Exception {
+		this.writeFlag = true;
 		String sql = deleteCreateSql(condtionTool);
 		return execSql(sql);
 	}
 
 	/** @param sql */
 	public int execSql(String sql) throws Exception {
+		loggerSql(sql);
+		if(sql.trim().substring(0,6).toLowerCase().startsWith("select")){
+			this.writeFlag = false;
+		}else{
+			this.writeFlag = true;
+		}
 		Statement resultStatement = null;
 		try {
 			resultStatement = this.getConnection().createStatement();
@@ -354,6 +484,9 @@ public class DbBasicService implements NeedConnect {
 			logger.error(FuncStatic.errorTrace(e));
 		}finally {
 			this.closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
 		}
 		return 0;
 	}
@@ -405,6 +538,25 @@ public class DbBasicService implements NeedConnect {
 			break;
 		}
 		return o;
+	}
+
+	private void loggerSql(String sql) {
+		if (this.dbConnect.printSql()) {
+			if (sql.length() > 600) {
+				if(this.threadId == null){
+					logger.info(sql.subSequence(0, 600)+" ......");
+				}else{
+					logger.info("threadId "+this.threadId+":" +sql.subSequence(0, 600)+" ......");
+				}
+				
+			} else {
+				if(this.threadId == null){
+					logger.info(sql.toString());
+				}else{
+					logger.info("threadId "+this.threadId+":" +sql.toString());
+				}
+			}
+		}
 	}
 
 	private String getConditionStr(ConditionTool condtionTool) {
