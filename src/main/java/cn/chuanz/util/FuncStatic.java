@@ -54,4 +54,21 @@ public class FuncStatic {
 		return false;
 	}
 	
+	/**
+	 * 去掉一个字符串两端的某个字符串
+	 * 
+	 * @param str
+	 *            原字符串
+	 * @param c
+	 *            需要去掉的字符串
+	 * @return
+	 */
+	public static String trim(String str, String c) {
+		while (str.startsWith(c))
+			str = str.substring(c.length(), str.length());
+		while (str.endsWith(c))
+			str = str.substring(0, str.length() - c.length());
+		return str;
+	}
+	
 }
