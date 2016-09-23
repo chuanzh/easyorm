@@ -12,11 +12,15 @@ DbBasicService封装JDBC，包括的基础操作数据库的方法，需要传�
 #使用方法
 新建一个数据库连接对象，如果是MySQL连接，继承MysqlDb  
 初始化一个DbBasicService：  
+```Java
 DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());  
+```
 使用dbService可直接操作数据库  
 
 另外可以使用query对象来查询，返回对应的实例：  
 比如有TUserQuery  
+```Java
 TUserQuery query = DbFactory.instance(dbService, TUserQuery.class);  
-List\<TUserRowData\> list = query.queryRows();  
+List<TUserRowData> list = query.queryRows();  
+```
 具体可以查看src/test/java下MysqlTest.java类  
