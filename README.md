@@ -36,7 +36,7 @@ row.setInsertTime(new Date());
 row.insert();
 dbService.freeResource();
 ```
-使用TuserRowData对象进行更新操作，使用DbFactory.find方法可直接根据主键查询对象
+使用TUserRowData对象进行更新操作，使用DbFactory.find方法可直接根据主键查询对象
 ```Java
 DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());
 //TUserRowData row = DbFactory.find(dbService, TUserRowData.class, 3);
