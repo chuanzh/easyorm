@@ -15,12 +15,36 @@ DbBasicService封装JDBC，包括的基础操作数据库的方法，需要传�
 ```Java
 DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());  
 ```
-使用dbService可直接操作数据库  
+使用dbService可直接操作数据库，注意使用完成后要使用dbService.freeResource();释放数据库连接  
 
 另外可以使用query对象来查询，返回对应的实例：  
 比如有TUserQuery  
 ```Java
 TUserQuery query = DbFactory.instance(dbService, TUserQuery.class);  
+query.setName("zhangsan");
 List<TUserRowData> list = query.queryRows();  
+```
+使用TUserRowData对象进行插入操作
+```Java
+DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());
+TUserRowData row = DbFactory.instance(dbService, TUserRowData.class);
+row.setName("张晓明");
+row.setAge(20);
+row.setAddress("北京市朝阳区");
+row.setIntroduction("我叫张晓明");
+row.setInsertTime(new Date());
+row.insert();
+dbService.freeResource();
+```
+使用TuserRowData对象进行更新操作，使用DbFactory.find方法可直接根据主键查询对象
+```Java
+DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());
+//TUserRowData row = DbFactory.find(dbService, TUserRowData.class, 3);
+TUserRowData row = DbFactory.instance(dbService, TUserRowData.class);
+row.setId(3);
+row.setIntroduction("我叫张晓明明");
+row.setInsertTime(new Date());
+row.update();
+dbService.freeResource();
 ```
 具体可以查看src/test/java下MysqlTest.java类  
