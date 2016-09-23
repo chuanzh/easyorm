@@ -18,5 +18,5 @@ DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());
 另外可以使用query对象来查询，返回对应的实例：  
 比如有TUserQuery  
 TUserQuery query = DbFactory.instance(dbService, TUserQuery.class);  
-List<<TUserRowData>> list = query.queryRows();  
+List&lt;TUserRowData&gt; list = query.queryRows();  
 具体可以查看src/test/java下MysqlTest.java类  
