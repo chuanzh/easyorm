@@ -10,7 +10,7 @@ import cn.chuanz.db.rowdata.TUserRowData;
 public class MysqlTest {
 
 	public static void main(String[] args) throws Exception {
-		new MysqlTest().update();
+		new MysqlTest().queryBySql2();
 		
 	}
 	
@@ -53,6 +53,21 @@ public class MysqlTest {
 		
 		String sql = "select * from t_user";
 		List<HashMap<String,String>> list = dbService.queryExecSql(sql);
+		for (HashMap<String,String> map : list) {
+			for (String s : map.keySet()) {
+				System.out.println(s+":"+map.get(s));
+			}
+			System.out.println("======================");
+		}
+		
+		dbService.freeResource();
+	}
+	
+	private void queryBySql2() throws Exception {
+		DbBasicService dbService = DbFactory.instanceService(DbTestConnect.instance());
+		
+		String sql = "select * from t_user where name like ?";
+		List<HashMap<String,String>> list = dbService.queryExecSql(sql,new Object[]{"张%"});
 		for (HashMap<String,String> map : list) {
 			for (String s : map.keySet()) {
 				System.out.println(s+":"+map.get(s));

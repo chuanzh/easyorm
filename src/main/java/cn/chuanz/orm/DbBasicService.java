@@ -3,6 +3,7 @@ package cn.chuanz.orm;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -257,6 +258,109 @@ public class DbBasicService implements NeedConnect {
 		return list;
 	}
 	
+	/** @param 调用完后需手动释放资源  
+	 * 
+	 * 使用PreparedStatement动态设置变量
+	 * @param sql
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 * 
+	 * */
+	public ResultSet queryExecResultSet(String sql, Object[] params) throws Exception {
+		this.writeFlag = false;
+		loggerSql(sql,params);
+		PreparedStatement resultStatement = null;
+		try {
+			resultStatement = this.getConnection().prepareStatement(sql);
+			if (params != null) {
+				int paramIndex = 1;
+				for (Object value : params) {
+					if (value instanceof Date) {
+						resultStatement.setDate(paramIndex, (java.sql.Date) value);
+					} else {
+						resultStatement.setString(paramIndex, value.toString());
+					}
+					paramIndex ++;
+				}
+			}
+			if(tmpStatement == null){
+				tmpStatement = new ArrayList<Statement>();
+			}
+			tmpStatement.add(resultStatement);
+			return resultStatement.executeQuery();
+		} catch (Exception e) {
+			logger.error(FuncStatic.errorTrace(e));
+		} 
+		return null;
+	}
+
+	public String queryExecSqlOneValue(String sql,Object[] params) throws Exception {
+		HashMap<String, String> map = this.queryExecSqlOneRow(sql,params);
+		if(map != null){
+			return map.values().iterator().next();
+		}else{
+			return null;
+		}
+	}
+	
+	public HashMap<String, String> queryExecSqlOneRow(String sql,Object[] params) throws Exception {
+		List<HashMap<String, String>> list = this.queryExecSql(sql,params);
+		if(list.size() > 0){
+			return list.get(0);
+		}else{
+			return null;
+		}
+	}
+	
+	/**
+	 * 使用PreparedStatement动态设置变量
+	 * @param sql
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 */
+	public List<HashMap<String, String>> queryExecSql(String sql,Object[] params) throws Exception {
+		this.writeFlag = false;
+		loggerSql(sql,params);
+		
+		List<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+		PreparedStatement resultStatement = null;
+		ResultSet resultSet = null;
+		try {
+			resultStatement = this.getConnection().prepareStatement(sql);
+			if (params != null) {
+				int paramIndex = 1;
+				for (Object value : params) {
+					if (value instanceof Date) {
+						resultStatement.setDate(paramIndex, (java.sql.Date) value);
+					} else {
+						resultStatement.setString(paramIndex, value.toString());
+					}
+					paramIndex ++;
+				}
+			}
+			resultSet = resultStatement.executeQuery();
+			int columnCount = resultSet.getMetaData().getColumnCount();
+			while (resultSet.next()) {
+				HashMap<String, String> map = new HashMap<String, String>();
+				for (int i=1; i <=columnCount; i++ ) {
+					map.put(resultSet.getMetaData().getColumnName(i), resultSet.getString(i));
+				}
+				list.add(map);
+			}
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			freeResult(resultSet);
+			closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
+		}
+		return list;
+	}
+	
 	private void freeResult(ResultSet result) {
 		try {
 			if (result != null) {
@@ -490,6 +594,48 @@ public class DbBasicService implements NeedConnect {
 		}
 		return 0;
 	}
+	
+	/**
+	 * 使用PreparedStatement动态设置变量值
+	 * @param sql
+	 * @param params
+	 * @return
+	 * @throws Exception
+	 */
+	public int execSql(String sql,Object[] params) throws Exception {
+		loggerSql(sql,params);
+		if(sql.trim().substring(0,6).toLowerCase().startsWith("select")){
+			this.writeFlag = false;
+		}else{
+			this.writeFlag = true;
+		}
+		PreparedStatement resultStatement = null;
+		try {
+			resultStatement = this.getConnection().prepareStatement(sql);
+			if (params != null) {
+				int paramIndex = 1;
+				for (Object value : params) {
+					if (value instanceof Date) {
+						resultStatement.setDate(paramIndex, (java.sql.Date) value);
+					} else {
+						resultStatement.setString(paramIndex, value.toString());
+					}
+					paramIndex ++;
+				}
+			}
+			int i = resultStatement.executeUpdate();
+			this.closeStatement(resultStatement);
+			return i;
+		} catch (Exception e) {
+			logger.error(FuncStatic.errorTrace(e));
+		}finally {
+			this.closeStatement(resultStatement);
+			if(!this.ifTransaction){
+				this.freeResource();
+			}
+		}
+		return 0;
+	}
 
 	private String formatSqlValue(Object value) {
 		if(value == null){
@@ -557,6 +703,15 @@ public class DbBasicService implements NeedConnect {
 				}
 			}
 		}
+	}
+	
+	private void loggerSql(String sql,Object[] params) {
+		StringBuffer sb = new StringBuffer();
+		for (Object param : params) {
+			if (param != null) sb.append(param.toString());
+		}
+		sql += " ["+sb.toString()+"]";
+		loggerSql(sql);
 	}
 
 	private String getConditionStr(ConditionTool condtionTool) {
