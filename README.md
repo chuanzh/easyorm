@@ -7,6 +7,22 @@ DbBasicService封装JDBC，包括的基础操作数据库的方法，需要传�
 #配置说明
 主配置文件：src/main/resources/cfg.properties   
 里面包括数据配置等，如果需要打印SQL，设置showSql=true  
+如，数据库配置：
+```xml
+#主库配置
+test_db_ipandport=127.0.0.1:3306
+test_db_name=test
+test_db_username=dbuser
+test_db_password=123456
+test_db_poolconf=maxActive=200; maxIdle=50; maxWait=30000; removeAbandoned=true; removeAbandonedTimeout=10;
+
+#从库配置，多个用“;”隔开
+test_slave_db_ipandport=127.0.0.2:3306;127.0.0.3:3306;127.0.0.4:3306
+test_slave_db_name=test;test;test
+test_slave_db_username=dbuser;dbuser;dbuser
+test_slave_db_password=123456;123456;123456
+test_slave_db_poolconf=maxActive=200; maxIdle=50; maxWait=30000; removeAbandoned=true; removeAbandonedTimeout=10;
+```
 日志配置文件：src/main/resources/log4j.xml  
 
 #使用方法
@@ -46,5 +62,24 @@ row.setIntroduction("Hello, This is my introduction");
 row.setInsertTime(new Date());
 row.update();
 dbService.freeResource();
+```
+直接通过SQL语句查询，有两种方式：
+通过statement，和prepareStatement对象，若不指定参数，则会使用statement,指定参数使用prepareStatement
+```Java
+String sql = "select * from t_user";
+List<HashMap<String,String>> list = dbService.queryExecSql(sql);
+```
+```Java
+String sql = "select * from t_user where name like ?";
+List<HashMap<String,String>> list = dbService.queryExecSql(sql,new Object[]{"张%"});
+```
+数据库事务使用，调用dbService.UseTransction()方法，若开启事务则默认使用主库的配置，插入两条用户关系数据：
+```Java
+dbService.UseTransction();
+String sql = "insert into user(name,sex,age) values(?,?,?)";
+dbService.execSql(sql,new Object[]{"zhangsan",1,20});
+sql = "insert into user_relation(role,power,sign) value(?,?,?)";
+dbService.execSql(sql,new Object[]{"2","100","this is my sign"});
+dbService.commit();
 ```
 具体可以查看src/test/java下MysqlTest.java类  
