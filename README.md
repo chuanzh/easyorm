@@ -83,3 +83,18 @@ dbService.execSql(sql,new Object[]{"2","100","this is my sign"});
 dbService.commit();
 ```
 具体可以查看src/test/java下MysqlTest.java类  
+
+自动生成query,rowData,MapTable类，  
+MapTable：表字段映射关系  
+rowData：封装表一行记录数据，进行更新、插入、删除操作。  
+query：数据查询类，返回rowData对象或rowData集合  
+具体可查看：/src/main/java/cn/chuanz/codetool/CreateFile.java类  
+```Java
+//配置表  若为null 或者 ""  则生成全库表的java类
+String tableName = "t_user"; 
+//包名
+String packagePath = "com.chuanz.db";
+//生成文件路径
+foldName = "D:/v/";
+```
+
