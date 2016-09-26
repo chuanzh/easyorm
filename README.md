@@ -76,7 +76,7 @@ List<HashMap<String,String>> list = dbService.queryExecSql(sql,new Object[]{"张
 数据库事务使用，调用dbService.UseTransction()方法，若开启事务则默认使用主库的配置，插入两条用户关系数据：
 ```Java
 dbService.UseTransction();
-String sql = "insert into user(name,sex,age) values(?,?,?);
+String sql = "insert into user(name,sex,age) values(?,?,?)";
 dbService.execSql(sql,new Object[]{"zhangsan",1,20});
 sql = "insert into user_relation(role,power,sign) value(?,?,?)";
 dbService.execSql(sql,new Object[]{"2","100","this is my sign"});
