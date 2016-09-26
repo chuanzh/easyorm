@@ -4,11 +4,11 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import cn.lih.basic.common.FuncDate;
-import cn.lih.basic.common.FuncStatic;
-import cn.lih.basic.datapersist.ConditionTool;
-import cn.lih.basic.datapersist.BaseOneRow; 
-import cn.lih.basic.datapersist.MapTable;
+import cn.chuanz.orm.common.FuncDate;
+import cn.chuanz.orm.common.FuncStatic;
+import cn.chuanz.orm.datapersist.ConditionTool;
+import cn.chuanz.orm.datapersist.BaseOneRow; 
+import cn.chuanz.orm.datapersist.MapTable;
 import ${table.PackagePath}.maptable.${table.tableNameUp};
 
 public class ${table.TableNameHeadUp}RowData extends BaseOneRow{
