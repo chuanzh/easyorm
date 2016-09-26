@@ -1,0 +1,134 @@
+package ${package};
+
+import java.util.Date;
+
+import org.apache.log4j.Logger;
+
+import cn.lih.basic.common.FuncDate;
+import cn.lih.basic.common.FuncStatic;
+import cn.lih.basic.datapersist.ConditionTool;
+import cn.lih.basic.datapersist.BaseOneRow; 
+import cn.lih.basic.datapersist.MapTable;
+import ${table.PackagePath}.maptable.${table.tableNameUp};
+
+public class ${table.TableNameHeadUp}RowData extends BaseOneRow{
+	private static Logger logger = Logger.getLogger ( ${table.TableNameHeadUp}RowData.class ) ;
+	
+#foreach($field in ${table.fields})
+#if($field.FieldAnnot == "@FieldBigNumber")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public Long get${field.FieldNameHump}() {
+		try {
+			return rowData.getValueLong(${table.tableNameUp}.f_${field.FieldName});
+		} catch (Exception e) {
+			logger.error(FuncStatic.errorTrace(e));
+			return null;
+		}
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void set${field.FieldNameHump}(Long value) {
+		rowData.setValue(${table.tableNameUp}.f_${field.FieldName},value );
+	}
+	
+#end
+#if($field.FieldAnnot == "@FieldNumber")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public Integer get${field.FieldNameHump}() {
+		try {
+			return rowData.getValueInt(${table.tableNameUp}.f_${field.FieldName});
+		} catch (Exception e) {
+			logger.error(FuncStatic.errorTrace(e));
+			return null;
+		}
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void set${field.FieldNameHump}(Integer value) {
+		rowData.setValue(${table.tableNameUp}.f_${field.FieldName}, value );
+	}
+	
+#end
+#if($field.FieldAnnot == "@FieldString")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public String get${field.FieldNameHump}() {
+		return rowData.getValueString(${table.tableNameUp}.f_${field.FieldName});
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void set${field.FieldNameHump}(String value) {
+		rowData.setValue(${table.tableNameUp}.f_${field.FieldName}, value );
+	}
+	
+#end	
+#if($field.FieldAnnot == "@FieldDate")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public Date get${field.FieldNameHump}() {
+		return rowData.getValueDate(${table.tableNameUp}.f_${field.FieldName});
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void set${field.FieldNameHump}(Date value) {
+		rowData.setValue(${table.tableNameUp}.f_${field.FieldName}, value );
+	}
+	
+#end
+#if($field.FieldAnnot == "@FieldClob")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public String get${field.FieldNameHump}() throws Exception{
+		if(rowData.getValue(${table.tableNameUp}.f_${field.FieldName}) == null){
+			ConditionTool tool = new ConditionTool();
+			tool.setCondition(getMapTable().getKeyColumns(), rowData.getValue(getMapTable().getKeyColumns()));
+			rowData.setCacheValue(${table.tableNameUp}.f_${field.FieldName}, this.getDbService().readTextColumn(${table.tableNameUp}.f_${field.FieldName},tool).toString());
+		}
+		return rowData.getValueString(${table.tableNameUp}.f_${field.FieldName});
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void set${field.FieldNameHump}(String value) {
+		rowData.setValue(${table.tableNameUp}.f_${field.FieldName},value);
+	}
+	
+#end
+#if($field.FieldAnnot == "@FieldChar")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public Character get${field.FieldNameHump}() {
+		try {
+			return rowData.getValueChar(${table.tableNameUp}.f_${field.FieldName});
+		} catch (Exception e) {
+			logger.error(FuncStatic.errorTrace(e));
+			return null;
+		}
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void set${field.FieldNameHump}(Character value) {
+		rowData.setValue(${table.tableNameUp}.f_${field.FieldName}, value );
+	}
+	
+#end
+#end
+  
+	@Override
+	protected MapTable getMapTable() {
+ 		return ${table.tableNameUp}.instance();
+	}
+ }

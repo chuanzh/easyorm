@@ -1,0 +1,40 @@
+package ${package};
+
+import cn.lih.basic.datapersist.MapTable;
+import cn.lih.basic.datapersist.fieldannotation.FieldAuto;
+import cn.lih.basic.datapersist.fieldannotation.FieldChar;
+import cn.lih.basic.datapersist.fieldannotation.FieldClob;
+import cn.lih.basic.datapersist.fieldannotation.FieldDate;
+import cn.lih.basic.datapersist.fieldannotation.FieldKey;
+import cn.lih.basic.datapersist.fieldannotation.FieldNumber;
+import cn.lih.basic.datapersist.fieldannotation.FieldString;
+import cn.lih.basic.datapersist.fieldannotation.FieldBigNumber;
+ 
+public class ${table.tableNameUp} extends MapTable{
+	public static final String TABLE_NAME = "${table.tableName}"; 
+	
+#foreach($field in ${table.fields})
+	/**
+	 * ${field.fieldComment}
+	 */
+#if($field.IfKey)
+	@FieldKey
+#end
+#if($field.FieldAutoIncreace)
+	@FieldAuto
+#end
+	${field.FieldAnnot}
+	public static final String f_${field.fieldName} = "${field.fieldName}";
+	
+#end
+	 
+	private ${table.tableNameUp}(){}
+	private static ${table.tableNameUp} instanceObj = null;
+	public static ${table.tableNameUp} instance(){
+		if(instanceObj == null){
+			instanceObj = new ${table.tableNameUp}();
+		}
+		return instanceObj;
+	}
+}
+ 

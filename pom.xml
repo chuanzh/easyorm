@@ -65,6 +65,12 @@
         <artifactId>ojdbc6</artifactId>    
         <version>11.2.0.4.0</version>
     </dependency>
+    
+    <dependency>
+		<groupId>org.apache.velocity</groupId>
+		<artifactId>velocity</artifactId>
+		<version>1.7</version>
+	</dependency>
 	  
   </dependencies>
 </project>

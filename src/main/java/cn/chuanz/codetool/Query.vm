@@ -1,0 +1,39 @@
+package ${package};
+
+import java.util.List;
+
+import cn.lih.basic.datapersist.ConditionOperator;
+import cn.lih.basic.datapersist.MapTable;
+import cn.lih.basic.datapersist.BaseRowsSet;
+import ${table.PackagePath}.rowdata.${table.TableNameHeadUp}RowData;
+import ${table.PackagePath}.maptable.${table.tableNameUp};
+ 
+public class ${table.TableNameHeadUp}Query extends BaseRowsSet{
+
+#foreach($field in ${table.fields})
+#if($field.FieldAnnot != "@FieldClob")
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void ctn${field.FieldNameHump}(String value) {
+		conditionTool.addCondition(${table.tableNameUp}.f_${field.FieldName},value,ConditionOperator.EQ);
+	}
+	/**
+	 * ${field.fieldComment}
+	 */
+	public void ctn${field.FieldNameHump}(String value,ConditionOperator operator) {
+		conditionTool.addCondition(${table.tableNameUp}.f_${field.FieldName},value,operator);
+	}
+#end
+#end
+	 
+	public List<${table.TableNameHeadUp}RowData> queryRows() throws Exception{
+		return this.queryRows(${table.TableNameHeadUp}RowData.class);
+	} 
+	
+	@Override
+	protected MapTable getMapTable() {
+ 		return ${table.tableNameUp}.instance();
+	}
+	 
+}
