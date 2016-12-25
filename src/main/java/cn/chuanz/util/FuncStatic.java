@@ -2,6 +2,8 @@ package cn.chuanz.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -21,7 +23,7 @@ public class FuncStatic {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		e.printStackTrace(pw);  
-		return e.toString();
+		return sw.toString();
  	}
 	
 	/**
@@ -96,5 +98,22 @@ public class FuncStatic {
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * 正则表达式搜索字符串
+	 * 
+	 * @param str
+	 * @param reg
+	 * @return
+	 */
+	public static String searchString(String str, String reg) {
+		Pattern p = Pattern.compile(reg);
+		Matcher m = p.matcher(str);
+		if (m.find()) {
+			return m.group(1);
+		}
+		return "";
+	}
+	
 	
 }

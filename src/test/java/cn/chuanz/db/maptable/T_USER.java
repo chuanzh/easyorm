@@ -1,11 +1,11 @@
 package cn.chuanz.db.maptable;
 
 import cn.chuanz.orm.MapTable;
-import cn.chuanz.orm.fileannotation.FieldAuto;
-import cn.chuanz.orm.fileannotation.FieldDate;
-import cn.chuanz.orm.fileannotation.FieldKey;
-import cn.chuanz.orm.fileannotation.FieldNumber;
-import cn.chuanz.orm.fileannotation.FieldString;
+import cn.chuanz.orm.fieldannotation.FieldAuto;
+import cn.chuanz.orm.fieldannotation.FieldDate;
+import cn.chuanz.orm.fieldannotation.FieldKey;
+import cn.chuanz.orm.fieldannotation.FieldNumber;
+import cn.chuanz.orm.fieldannotation.FieldString;
  
 public class T_USER extends MapTable{
 	public static final String TABLE_NAME = "t_user"; 

@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 
 import cn.chuanz.util.FuncFile;
@@ -30,9 +32,9 @@ public class CreateFile {
 	public static void main(String[] args) throws  Exception {
 		
 		//配置表  若为null 或者 ""  则生成全库表的java类
-		String tableName = "t_user";//app_sites 
-		String packagePath = "com.chuanz.db";
-		foldName = "D:/v/";
+		String tableName = "";//app_sites 
+		String packagePath = "cn.chuanz.db";
+		foldName = "/Users/zhangchuan/Documents/v/";
 		//程序开始
 		CreateFile cmt = new CreateFile();
 		CodeToolDbConnect db = CodeToolDbConnect.instance();
@@ -76,11 +78,20 @@ public class CreateFile {
 	public void createMapTable(TableInfo table) throws IOException {
 		String packageName = table.getPackagePath()+".maptable";
 		 
-		Context context = new VelocityContext();
+        Properties properties=new Properties();
+        properties.setProperty("resource.loader", "class");
+        properties.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        VelocityEngine velocityEngine=new VelocityEngine(properties);
+        
+        VelocityContext context=new VelocityContext();
 		context.put("table", table);
 		context.put("package", packageName);
-		StringWriter sw = new StringWriter();
-		Velocity.mergeTemplate("MapTable.vm", encode, context, sw);
+        StringWriter sw=new StringWriter();
+        
+        //从src目录下加载vm模板
+        String path = this.getClass().getResource("").getPath();
+		path = path.substring(path.indexOf("/classes/")+9);
+		velocityEngine.mergeTemplate(path+"MapTable.vm", encode, context, sw);
 		FuncFile.insertFile(this.foldName+"maptable/"+table.getTableNameUp()+".java", sw.toString());
 		System.out.println(this.foldName+"maptable/"+table.getTableNameUp()+".java : complete! " );
  	}
@@ -88,11 +99,20 @@ public class CreateFile {
 	public void createRowdata(TableInfo table) throws IOException{
 		String packageName = table.getPackagePath()+".rowdata";
 		 
-		Context context = new VelocityContext();
+        Properties properties=new Properties();
+        properties.setProperty("resource.loader", "class");
+        properties.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        VelocityEngine velocityEngine=new VelocityEngine(properties);
+        
+        VelocityContext context=new VelocityContext();
 		context.put("table", table);
 		context.put("package", packageName);
-		StringWriter sw = new StringWriter();
-		Velocity.mergeTemplate("Rowdata.vm", encode, context, sw);
+        StringWriter sw=new StringWriter();
+        
+        //从src目录下加载vm模板
+        String path = this.getClass().getResource("").getPath();
+		path = path.substring(path.indexOf("/classes/")+9);
+		velocityEngine.mergeTemplate(path+"Rowdata.vm", encode, context, sw);
 		FuncFile.insertFile(this.foldName+"rowdata/"+table.getTableNameHeadUp()+"RowData.java", sw.toString());
 		System.out.println(this.foldName+"rowdata/"+table.getTableNameHeadUp()+"RowData.java : complete! " );
 	}
@@ -100,11 +120,21 @@ public class CreateFile {
 	public void createQuery(TableInfo table) throws IOException{
 		String packageName = table.getPackagePath()+".query";
 		 
-		Context context = new VelocityContext();
+        Properties properties=new Properties();
+        properties.setProperty("resource.loader", "class");
+        properties.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        VelocityEngine velocityEngine=new VelocityEngine(properties);
+        
+        VelocityContext context=new VelocityContext();
 		context.put("table", table);
 		context.put("package", packageName);
-		StringWriter sw = new StringWriter();
-		Velocity.mergeTemplate("Query.vm", encode, context, sw);
+        StringWriter sw=new StringWriter();
+        
+        //从src目录下加载vm模板
+        String path = this.getClass().getResource("").getPath();
+		path = path.substring(path.indexOf("/classes/")+9);
+        velocityEngine.mergeTemplate(path+"Query.vm", encode, context, sw);
+		
 		FuncFile.insertFile(this.foldName+"query/"+table.getTableNameHeadUp()+"Query.java", sw.toString());
 		System.out.println(this.foldName+"query/"+table.getTableNameHeadUp()+"Query.java : complete! " );
 	}

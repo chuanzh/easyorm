@@ -1,4 +1,5 @@
-package cn.chuanz.orm.fileannotation;
+package cn.chuanz.orm.fieldannotation;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,6 +9,6 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface FieldAuto
-{  
-}  
+public @interface FieldClob
+{ 
+} 

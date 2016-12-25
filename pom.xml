@@ -4,7 +4,7 @@
 
   <groupId>cn.chuanz</groupId>
   <artifactId>easyorm</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>easyorm</name>
@@ -58,7 +58,7 @@
 		  <artifactId>commons-beanutils</artifactId>
 		  <version>1.8.0</version>
 	  </dependency>
-	  
+	 
 	 <!-- 添加oracle jdbc driver -->  
     <dependency>    
         <groupId>com.oracle</groupId>    
@@ -76,6 +76,12 @@
 	    <groupId>org.xerial</groupId>
 	    <artifactId>sqlite-jdbc</artifactId>
 	    <version>3.8.10.1</version>
+	</dependency>
+	
+	    <dependency>
+		<groupId>org.freemarker</groupId>
+		<artifactId>freemarker</artifactId>
+		<version>2.3.20</version>
 	</dependency>
 	  
   </dependencies>

@@ -1,14 +1,14 @@
 package ${package};
 
-import cn.chuanz.orm.datapersist.MapTable;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldAuto;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldChar;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldClob;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldDate;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldKey;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldNumber;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldString;
-import cn.chuanz.orm.datapersist.fieldannotation.FieldBigNumber;
+import cn.chuanz.orm.MapTable;
+import cn.chuanz.orm.fieldannotation.FieldAuto;
+import cn.chuanz.orm.fieldannotation.FieldChar;
+import cn.chuanz.orm.fieldannotation.FieldClob;
+import cn.chuanz.orm.fieldannotation.FieldDate;
+import cn.chuanz.orm.fieldannotation.FieldKey;
+import cn.chuanz.orm.fieldannotation.FieldNumber;
+import cn.chuanz.orm.fieldannotation.FieldString;
+import cn.chuanz.orm.fieldannotation.FieldBigNumber;
  
 public class ${table.tableNameUp} extends MapTable{
 	public static final String TABLE_NAME = "${table.tableName}"; 

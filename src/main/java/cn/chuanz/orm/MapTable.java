@@ -3,10 +3,10 @@ package cn.chuanz.orm;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import cn.chuanz.orm.fileannotation.FieldAuto;
-import cn.chuanz.orm.fileannotation.FieldClob;
-import cn.chuanz.orm.fileannotation.FieldDate;
-import cn.chuanz.orm.fileannotation.FieldKey;
+import cn.chuanz.orm.fieldannotation.FieldAuto;
+import cn.chuanz.orm.fieldannotation.FieldClob;
+import cn.chuanz.orm.fieldannotation.FieldDate;
+import cn.chuanz.orm.fieldannotation.FieldKey;
 
 public abstract class MapTable {
 	  

@@ -2,9 +2,9 @@ package ${package};
 
 import java.util.List;
 
-import cn.chuanz.orm.datapersist.ConditionOperator;
-import cn.chuanz.orm.datapersist.MapTable;
-import cn.chuanz.orm.datapersist.BaseRowsSet;
+import cn.chuanz.orm.ConditionOperator;
+import cn.chuanz.orm.MapTable;
+import cn.chuanz.orm.BaseRowsSet;
 import ${table.PackagePath}.rowdata.${table.TableNameHeadUp}RowData;
 import ${table.PackagePath}.maptable.${table.tableNameUp};
  
